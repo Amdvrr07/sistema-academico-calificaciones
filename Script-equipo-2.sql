@@ -1,13 +1,3 @@
--- Creacion momentanea de la tabla alumno
-
-create table if not exists alumno(
-
-   id_alumno serial primary key ,
-   nombre varchar(200) not null,
-   codigo varchar(20) unique not null -- Ejemplo 'MAT-1', 'FIS-4'
-);
-
-
 -- Creacion de la tabla materia
 
 create table if not exists materias(
