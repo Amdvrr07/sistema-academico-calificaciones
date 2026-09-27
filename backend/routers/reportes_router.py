@@ -35,3 +35,4 @@ async def reporte_academico():
 @router.get("/estadisticas")
 async def estadisticas():
     return await reportes.estadisticas()
+

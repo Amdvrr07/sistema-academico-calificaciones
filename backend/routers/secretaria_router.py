@@ -44,5 +44,13 @@ async def obtener_aulas():
 # Docentes
 
 @router.get("/docentes")
+
+
 async def obtener_docentes():
+<<<<<<< HEAD
     return await secretaria.obtener_docentes()
+=======
+    return await secretaria.obtener_docentes()
+
+
+>>>>>>> 71797ebcf8838159b2cf3553b6e750c3896ae10a

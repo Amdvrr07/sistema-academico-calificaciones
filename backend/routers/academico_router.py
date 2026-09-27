@@ -53,3 +53,5 @@ async def calcular_promedio(
     return await academico.calcular_promedio(
         estudiante_id
     )
+
+
