@@ -1,9 +1,26 @@
+-- =====================================================================
+-- Sistema de gestión escolar - módulo académico
+-- CAMBIO: este script es ahora la ÚNICA fuente de verdad de la base de datos
+-- (la app ya no crea tablas sola). Los modelos de src/models se ajustaron a él.
+-- Ejecutar sobre una base de datos vacía, por ejemplo:
+--   psql -U postgres -d gestion_escolar -f Script-equipo-2.sql
+-- =====================================================================
+
+-- CAMBIO: tabla nueva y PROVISIONAL. Antes este script fallaba al ejecutarse
+-- porque "inscripcion" referenciaba una tabla "alumno" que no existía en
+-- ningún lado. Solo existe para que las llaves foráneas funcionen.
+-- Reemplazar por la tabla real (cedula_escolar, nombre_completo,
+-- fecha_nacimiento, grado, seccion, representante_id...) cuando esté lista.
+create table if not exists alumno(
+   id_alumno serial primary key
+);
+
 -- Creacion de la tabla materia
 
 create table if not exists materias(
 
    id_materia serial primary key ,
-   nombre varchar(200) not null,
+   nombre varchar(200) not null, -- (el modelo de Python ahora también usa 200)
    codigo varchar(10) unique not null, -- Ejemplo 'MAT-1', 'FIS-4'
    grado int not null ,
    
@@ -12,7 +29,7 @@ create table if not exists materias(
 
 -- Creacion de la tabla puente inscripciones
 
-create table if not EXISTS inscripcion(
+create table if not exists inscripcion(
 
    id_inscripcion serial primary key,
    id_materia int not null references materias(id_materia) on delete restrict,
@@ -26,9 +43,14 @@ create table if not EXISTS inscripcion(
    
 );
 
+-- CAMBIO: índice nuevo. Acelera buscar inscripciones por materia y el chequeo
+-- de "no borrar una materia con inscripciones".
+-- (id_alumno ya queda cubierto por el índice del unique de arriba)
+create index if not exists idx_inscripcion_materia on inscripcion(id_materia);
+
 -- Creacion de la tabla notas
 
-create table if not EXISTS notas(
+create table if not exists notas(
 
    id_notas serial primary key,
    id_inscripcion int not null references inscripcion(id_inscripcion) on delete cascade,
