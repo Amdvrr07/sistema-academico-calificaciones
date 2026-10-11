@@ -2,10 +2,14 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import engine
 from models.base import Base
-from controllers.secretaria_controller import SecretariaController
 from routers import inscripcion, materias, notas, horarios, calificaciones, reportes, aulas
 
-Base.metadata.create_all(bind=engine)
+# Aplicar manejo de excepciones para la conexión con base de datos
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Aviso: No se pudo conectar a la base de datos para crear tablas: {e}")
+
 
 # Inicializar servidor fastAPI
 app = FastAPI()
