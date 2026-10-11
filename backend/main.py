@@ -3,12 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import engine
 from models.base import Base
 from controllers.secretaria_controller import SecretariaController
+from routers import inscripcion, materias, notas, horarios, calificaciones, reportes, aulas
 
 Base.metadata.create_all(bind=engine)
 
 # Inicializar servidor fastAPI
 app = FastAPI()
-app.include_router(SecretariaController.router)
+app.include_router(inscripcion.router)
+app.include_router(materias.router)
+app.include_router(notas.router)
+app.include_router(horarios.router)
+app.include_router(aulas.router)
+app.include_router(calificaciones.router)
+app.include_router(reportes.router)
+
 
 origenes = [
     "http://localhost:3000", # Puerto del frontend
