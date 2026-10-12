@@ -1,14 +1,14 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.controllers.utils import confirmar
-from backend.exceptions import Conflicto, NoEncontrado
-from backend.models.alumno import Alumno
-from backend.models.curso import Curso
+from controllers.utils import confirmar
+from exceptions import Conflicto, NoEncontrado
+from models.alumno import Alumno
+from models.curso import Curso
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from backend.models.inscripcion import Inscripcion
-from backend.schemas.inscripcion import InscripcionCreate, InscripcionUpdate
+from models.inscripcion import Inscripcion
+from schemas.inscripcion import InscripcionCreate, InscripcionUpdate
 
 async def _verificar_referencias(
     db: AsyncSession,
