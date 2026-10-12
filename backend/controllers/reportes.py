@@ -7,11 +7,11 @@ como en el resto del proyecto (y como pide la rúbrica: separación de capas).
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.exceptions import NoEncontrado
-from backend.models.curso import Curso
-from backend.models.inscripcion import Inscripcion
-from backend.models.materia import Materia
-from backend.models.notas import Nota
+from exceptions import NoEncontrado
+from models.curso import Curso
+from models.inscripcion import Inscripcion
+from models.materia import Materia
+from models.notas import Nota
 
 
 def _redondear(valor) -> float | None:

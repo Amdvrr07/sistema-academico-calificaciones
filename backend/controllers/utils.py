@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.exceptions import Conflicto
+from exceptions import Conflicto
 
 
 async def confirmar(db: AsyncSession, mensaje_conflicto: str) -> None:

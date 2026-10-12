@@ -1,10 +1,10 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.controllers.utils import confirmar
-from backend.exceptions import Conflicto, NoEncontrado
-from backend.models.materia import Materia
-from backend.schemas.materia import MateriaCreate, MateriaUpdate
+from controllers.utils import confirmar
+from exceptions import Conflicto, NoEncontrado
+from models.materia import Materia
+from schemas.materia import MateriaCreate, MateriaUpdate
 
 # Cambio: Se aceptaron todos los cambios del grupo 2, excepto el de eliminar_materia()
 async def _codigo_en_uso(
