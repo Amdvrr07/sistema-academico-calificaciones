@@ -109,7 +109,7 @@ def registrar_inscripcion(db: Session, datos: InscripcionCreate) -> Inscripcion:
     inscripcion = db.query(Inscripcion).filter(
         Inscripcion.alumno_id == datos.alumno_id,
         Inscripcion.materia_id == datos.materia_id
-    ).first
+    ).first()
 
     if inscripcion:
         return None

@@ -1,11 +1,11 @@
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.controllers.utils import confirmar
-from backend.exceptions import Conflicto, NoEncontrado
-from backend.models.inscripcion import Inscripcion
-from backend.models.notas import Nota
-from backend.schemas.notas import NotaCreate, NotaUpdate
+from controllers.utils import confirmar
+from exceptions import Conflicto, NoEncontrado
+from models.inscripcion import Inscripcion
+from models.notas import Nota
+from schemas.notas import NotaCreate, NotaUpdate
 
 MENSAJE_LAPSO = "Ya existe una nota para esa inscripción en ese lapso"
 

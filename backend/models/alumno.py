@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey, Integer, String, Date
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import date
-from representante import Representante
+from .representante import Representante
 from .base import Base
 
 # Equivalente a tabla 'alumnos'
