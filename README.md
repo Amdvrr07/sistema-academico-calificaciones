@@ -31,7 +31,7 @@ createdb -U postgres gestion_escolar
 psql -U postgres -d gestion_escolar -f "PROYECTO LENGUAJES.sql"
 
 # 4. Levantar la API (desde la carpeta raíz del proyecto)
-uvicorn src.main:app --reload
+uvicorn backend.main:app --reload
 ```
 
 Documentación interactiva en http://127.0.0.1:8000/docs
@@ -56,7 +56,7 @@ al implementar autenticación debe derivarse del usuario validado por el servido
 ## Notas para el equipo
 
 - CAMBIO: `PROYECTO LENGUAJES.sql` es la fuente de verdad de la base de datos;
-  los modelos de `src/models` se alinean con sus tablas académicas. La app no
+  los modelos de `backend/models` se alinean con sus tablas académicas. La app no
   crea tablas por sí sola.
 
 ## Historial de la corrección (para el equipo)

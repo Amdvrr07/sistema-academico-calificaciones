@@ -1,57 +1,42 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from typing import List
-from schemas.materia import MateriaCreate, MateriaUpdate, MateriaRead
-from controllers.materia import (
+from fastapi import APIRouter, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from backend.controllers.materia import (
     actualizar_materia,
     eliminar_materia,
     listar_materias,
     obtener_materia,
     registrar_materia,
 )
-from database import get_db_session  
-
+from backend.database import get_db
+from backend.schemas.materia import MateriaCreate, MateriaRead, MateriaUpdate
 
 router = APIRouter(prefix="/materias", tags=["Materias"])
 
 
 @router.post("/", response_model=MateriaRead, status_code=status.HTTP_201_CREATED)
-def crear(datos: MateriaCreate, db: Session = Depends(get_db_session)):
-    materia = registrar_materia(db, datos)
-    if materia is None:
-            raise HTTPException(status_code=404, detail=f"Codigo:[{datos.codigo}] ya registrado")
-    
-    return materia
+async def crear(datos: MateriaCreate, db: AsyncSession = Depends(get_db)):
+    return await registrar_materia(db, datos)
 
 
-@router.get("/", response_model=List[MateriaRead])
-def listar(db: Session = Depends(get_db_session)):
-    return listar_materias(db)
+@router.get("/", response_model=list[MateriaRead])
+async def listar(db: AsyncSession = Depends(get_db)):
+    return await listar_materias(db)
 
 
-@router.get("/{materia_id}", response_model=MateriaRead)
-def obtener(materia_id: int, db: Session = Depends(get_db_session)):
-    materia = obtener_materia(db, materia_id)
-    if materia is None:
-        raise HTTPException(status_code=404, detail="Materia no encontrada")
-    return materia
+@router.get("/{id_materia}", response_model=MateriaRead)
+async def obtener(id_materia: int, db: AsyncSession = Depends(get_db)):
+    return await obtener_materia(db, id_materia)
 
 
-@router.put("/{materia_id}", response_model=MateriaRead)
-def actualizar(
-    materia_id: int,
-    datos: MateriaUpdate,
-    db: Session = Depends(get_db_session),
+@router.put("/{id_materia}", response_model=MateriaRead)
+async def actualizar(
+    id_materia: int, datos: MateriaUpdate, db: AsyncSession = Depends(get_db)
 ):
-    materia = actualizar_materia(db, materia_id, datos)
-    if materia is None:
-        raise HTTPException(status_code=404, detail="Materia no encontrada")
-    return materia
+    return await actualizar_materia(db, id_materia, datos)
 
 
-@router.delete("/{materia_id}")
-def eliminar(materia_id: int, db: Session = Depends(get_db_session)):
-    materia = eliminar_materia(db, materia_id)
-    if materia is None:
-        raise HTTPException(status_code=404, detail="Materia no encontrada")
+@router.delete("/{id_materia}")
+async def eliminar(id_materia: int, db: AsyncSession = Depends(get_db)):
+    await eliminar_materia(db, id_materia)
     return {"mensaje": "Materia eliminada correctamente"}
