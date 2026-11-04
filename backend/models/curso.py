@@ -13,11 +13,10 @@ class Curso(Base):
             "periodo_escolar ~ '^[0-9]{4}-[0-9]{4}$'",
             name="cursos_periodo_escolar_check",
         ),
-        UniqueConstraint("grado", "seccion", "periodo_escolar", name="curso_unico"), # Constraint que indica: El grado, sección y periodo de cada curso debe ser unico 
+        UniqueConstraint("grado", "seccion", "periodo_escolar", name="curso_unico"), 
     )
 
     curso_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     grado: Mapped[int] = mapped_column(Integer, nullable=False)
     seccion: Mapped[str] = mapped_column(String(1), nullable=False)
     periodo_escolar: Mapped[str] = mapped_column(String(10), nullable=False)
-      

@@ -117,19 +117,10 @@ class ReporteFinanciaro(BaseModel):
     deudas_cursos: List[DeudaCurso]
     deudas_grados: List[DeudaGrado]
 
-# Total de estudiantes
-class ReporteEstudiantes(BaseModel):
-    total_estudiantes: int
-
-# Promedio del estudiante
-class ReportePromedio(BaseModel):
-    estudiante_id: int
+class ReporteItem(BaseModel):
+    nombre_item: str
     promedio: float
-
-# Reporte general
-class ReporteGeneral(BaseModel):
-    total_estudiantes: int
-    total_aprobados: int
-    total_reprobados: int
-
+class ReportesAcademico(BaseModel):
+    agrupado_por: str
+    datos: List[ReporteItem]
 

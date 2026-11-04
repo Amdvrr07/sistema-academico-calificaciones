@@ -13,7 +13,7 @@ class Profesor(Base):
     telefono: Mapped[str] = mapped_column(String(20), nullable=False)
     correo: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     especialidad: Mapped[str] = mapped_column(String(20), nullable=False)
-    
+
     salario_base: Mapped[float] = mapped_column(
         Numeric(8, 2),
         CheckConstraint("salario_base > 0", name="check_salario_base")
