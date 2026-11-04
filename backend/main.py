@@ -3,16 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from exceptions import Conflicto, NoEncontrado
 
-from database import engine
-from models.base import Base
-from routers import inscripcion, materias, notas, horarios, calificaciones, reportes, aulas
-
-# Aplicar manejo de excepciones para la conexión con base de datos
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Aviso: No se pudo conectar a la base de datos para crear tablas: {e}")
-
+from routers import inscripcion, materias, notas, horarios, calificaciones, aulas, reportes_router
 
 # Inicializar servidor fastAPI
 app = FastAPI()
@@ -22,7 +13,7 @@ app.include_router(notas.router)
 app.include_router(horarios.router)
 app.include_router(aulas.router)
 app.include_router(calificaciones.router)
-app.include_router(reportes.router)
+app.include_router(reportes_router.router)
 
 
 origenes = [
@@ -34,7 +25,7 @@ origenes = [
 @app.exception_handler(NoEncontrado)
 async def _no_encontrado(_:Request, exc:NoEncontrado):
     return JSONResponse(
-        status_code=404, 
+        status_code=404,
         content={"detail": exc.detalle}
     )
 
@@ -50,5 +41,6 @@ async def _conflicto(_:Request, exc:Conflicto):
 app.add_middleware(
     CORSMiddleware, # Habilita el Intercambio de Recursos de Origen Cruzado(CORS)
     allow_origins=origenes, # Especifica la ruta los puertos
-    allow_methods= ["*"] # Permite todos los métodos del backend
+    allow_methods=["*"], # Permite todos los métodos del backend
+    allow_headers=["*"], # Permite todas las cabeceras (Content-Type, Authorization, etc.)
 )
