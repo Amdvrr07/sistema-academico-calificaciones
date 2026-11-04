@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Body
-from backend.controllers import reportes_controller
+from controllers import reportes_controller
 from typing import Optional
-
+from fastapi.responses import JSONResponse
 from schemas.reportes_schema import(
     DetallePerLapso,
     DetalleFinAnio,
     CobroDeudas,
     RecibosPendientes2, 
     ReporteAcademico,
-    ReporteFinanciaro
+    ReporteFinanciaro, ReportesAcademico
 )
 
 router = APIRouter(
@@ -56,7 +56,22 @@ async def obtener_reporte_academico(
 
 @router.get("/finanzas", response_model=ReporteFinanciaro)
 async def obtener_reporte_finanzas(limit: Optional[int] = None):
-    return await reportes_controller.ObtenerDatosFinanzas(limit)
+    return await reportes_controller.obtenerDatosFinanzas(limit)
 
+
+@router.get("/reporte/academico", response_model=ReportesAcademico)
+async def obtenener_reporte_financiero2(periodo_escolar: Optional[str] =  None, criterio_agrupacion:str = 'periodo_escolar'):
+    try:
+        return await reportes_controller.obtenerDatosAcademicos(criterio_agrupacion, periodo_escolar)
+    except ValueError:
+        return JSONResponse(
+            status_code=300,
+            content={"error":"Criterio no valido para generar el reporte."}
+        )
+    except NameError:
+        return JSONResponse(
+            status_code=301,
+            content={"error":"Debe proporcionar el periodo escolar actual."}
+        )
 
 
