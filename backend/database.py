@@ -1,12 +1,15 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
+
 # Variables de entorno del contenedor de Docker
-host = os.getenv("POSTGRES_HOST", "localhost")
-user = os.getenv("POSTGRES_USER", "postgres")
-password = os.getenv("POSTGRES_PASSWORD", "root_password")
-db = os.getenv("POSTGRES_DB", "database")
-port = os.getenv("POSTGRES_PORT", "5432")
+host = os.getenv("DB_HOST")
+user = os.getenv("DB_USER")
+password = os.getenv("DB_PASSWORD")
+db = os.getenv("DB_NAME")
+port = os.getenv("DB_PORT")
 
 # Enlace para la conexión con la base de datos. asyncpg es un driver asíncrono para PostgreSQL
 DB_URL = os.getenv(
