@@ -1,8 +1,10 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-import os
-from dotenv import load_dotenv
 from sqlalchemy.orm import declarative_base
+from dotenv import load_dotenv
+import os
+
 load_dotenv()
+
 # Variables de entorno del contenedor de Docker
 host = os.getenv("DB_HOST")
 user = os.getenv("DB_USER")
