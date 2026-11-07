@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 from .base import Base
+
 class ProfesorCurso(Base):
     __tablename__ = "profesores_cursos"
     __table_args__ = (

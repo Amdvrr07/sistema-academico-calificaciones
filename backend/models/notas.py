@@ -17,12 +17,12 @@ from .base import Base
 class Nota(Base):
     __tablename__ = "notas"
     __table_args__ = (
-    CheckConstraint(
-        "calificacion >= 0 AND calificacion <= 20", # Nota entre 0 y 20
-        name="ck_notas_calificacion",
-    ),
-        CheckConstraint("lapso BETWEEN 1 AND 3", name="notas_lapso_check"), # Lapso entre 1 y 3
-        UniqueConstraint("inscripcion_id", "lapso", name="nota_unica"), # Nota única por lapso
+        CheckConstraint(
+            "calificacion >= 0 AND calificacion <= 20", 
+            name="ck_notas_calificacion",
+        ),
+        CheckConstraint("lapso BETWEEN 1 AND 3", name="notas_lapso_check"),
+        UniqueConstraint("inscripcion_id", "lapso", name="nota_unica"), 
     )
 
     nota_id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -34,7 +34,3 @@ class Nota(Base):
     fecha_registro: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, server_default=func.now()
     )
-
-  
-
-

@@ -1,3 +1,7 @@
+-- Creacion de Enums para la base de datos
+CREATE TYPE estado_recibo AS ENUM('pendiente', 'pagado');
+CREATE TYPE metodos_pago AS ENUM ('efectivo', 'transferencia', 'pago_movil', 'zelle', 'binance', 'punto_venta');
+
 -- Tabla cursos
 CREATE TABLE IF NOT EXISTS cursos(
 	curso_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -38,7 +42,8 @@ CREATE TABLE IF NOT EXISTS representantes (
 	cedula varchar(10) NOT NULL UNIQUE,
 	correo varchar(100) NOT NULL UNIQUE,
 	telefono varchar(20) NOT NULL,
-	direccion varchar(200) NOT NULL
+	direccion varchar(200) NOT NULL,
+	monto_deuda DECIMAL(10,2) NOT NULL DEFAULT 0
 );
 
 -- Tabla de estudiantes de la institucion
@@ -91,41 +96,54 @@ CREATE TABLE IF NOT EXISTS profesores(
 	ON UPDATE CASCADE
 );
 
--- Tabla de cobranzas
-CREATE TABLE IF NOT EXISTS cobranzas(
-	cobranza_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+-- Tabla de recibos de cobro (Antes llamada cobranzas)
+-- Datos tipo factura
+CREATE TABLE IF NOT EXISTS recibos_cobro(
+	recibo_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	concepto varchar(100) NOT NULL,
-	fecha_vencimiento DATE NOT NULL,
-	monto numeric(8,2) NOT NULL CHECK(monto >0),
-	estado varchar(15) NOT NULL CHECK (estado IN ('pagado', 'por cobrar')),
+	fecha_generacion DATE NOT NULL DEFAULT CURRENT_DATE,
+	-- fecha_solvencia DATE DEFAULT NULL,
+	monto_total numeric(8,2) NOT NULL CHECK(monto_total >0),
+	monto_pagado NUMERIC(8,2) NOT NULL DEFAULT 0  CHECK(monto_pagado>= 0),
+	estado estado_recibo NOT NULL DEFAULT 'pendiente',
 	alumno_id INT NOT NULL,
-	representante_id INT NOT NULL,
+
 	
 	-- Indentifica al alumno por el cual se realiza la cobranza
-	CONSTRAINT fk_cobranzas_alumno
+	CONSTRAINT fk_recibos_cobros_alumno
 	FOREIGN KEY (alumno_id)
 	REFERENCES alumnos(alumno_id)
 	ON DELETE RESTRICT
 	ON UPDATE CASCADE,
-	
-	-- Representa relacion N:1 entre cobranza y representante (Varias cobranzas pueden estar referidas a un mismo representante)
-	CONSTRAINT fk_cobranzas_representante
+
+	CONSTRAINT pago_no_excede CHECK (monto_pagado<=monto_total)
+);
+
+CREATE TABLE IF NOT EXISTS pagos_representantes(
+	pago_representante_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	monto NUMERIC(8,2) NOT NULL CHECK(monto>0),
+	fecha_pago TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	metodo_pago metodos_pago NOT NULL,
+	referencia_pago  varchar(100) NOT NULL,
+	representante_id INT NOT NULL,
+
+	CONSTRAINT fk_pagos_representantes_representante 
 	FOREIGN KEY (representante_id)
 	REFERENCES representantes(representante_id)
 	ON DELETE RESTRICT
 	ON UPDATE CASCADE
 );
 
--- Tabla de pagos
-CREATE TABLE IF NOT EXISTS pagos (
-	pago_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+-- Tabla de pagos de profesores (Sueldo de los Profesores)
+CREATE TABLE IF NOT EXISTS pagos_profesores (
+	pago_profesor_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	fecha_pago DATE NOT NULL DEFAULT CURRENT_DATE, -- Se establece la fecha de pago como la actual, por defecto
 	concepto varchar(100) NOT NULL,
 	monto decimal(8,2) NOT NULL CHECK(monto > 0), -- El monto no puede ser negativo ni nulo
 	profesor_id INT NOT NULL,
 
 	-- Se establece la relacion N:1 con el profesor hacia el que se dirige al pago
-	CONSTRAINT fk_pagos_profesor
+	CONSTRAINT fk_pagos_profesores_profesor
 	FOREIGN KEY (profesor_id)
 	REFERENCES profesores(profesor_id)
 	ON DELETE RESTRICT
@@ -556,3 +574,113 @@ AFTER UPDATE ON notas
 FOR EACH ROW
 WHEN (OLD.calificacion IS DISTINCT FROM NEW.calificacion)
 EXECUTE FUNCTION crear_log_auditoria();
+
+--Triggers de Cobranza
+
+CREATE OR REPLACE FUNCTION actualizar_estado_recibo()
+RETURNS TRIGGER AS $$
+BEGIN 
+	NEW.estado:= CASE
+		WHEN NEW.monto_pagado >= NEW.monto_total THEN 'pagado':: estado_recibo 
+		ELSE 'pendiente'::estado_recibo
+	END;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION abonar_a_recibos(p_id_representante INT, p_monto_pago NUMERIC)
+RETURNS NUMERIC AS $$
+DECLARE
+	v_monto_restante NUMERIC :=p_monto_pago;
+	v_monto_aplicar NUMERIC;
+	recibo RECORD;
+
+BEGIN
+	FOR recibo IN 
+	SELECT r.recibo_id, r.monto_total, r.monto_pagado 
+	FROM recibos_cobro r 
+	JOIN alumnos a ON a.alumno_id = r.alumno_id
+	WHERE a.representante_id = p_id_representante
+	AND r.estado = 'pendiente'
+	ORDER BY r.fecha_generacion, r.recibo_id
+	FOR UPDATE OF r
+
+	LOOP
+	EXIT WHEN v_monto_restante<=0;
+	v_monto_aplicar:= LEAST(
+		v_monto_restante,
+		recibo.monto_total - recibo.monto_pagado
+	);
+
+	UPDATE recibos_cobro
+	SET monto_pagado =  monto_pagado + v_monto_aplicar
+	WHERE recibo_id =  recibo.recibo_id;
+
+	v_monto_restante:= v_monto_restante-v_monto_aplicar;
+
+	END LOOP;
+	RETURN v_monto_restante;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION aplicar_pago_recibos()
+RETURNS TRIGGER AS $$
+BEGIN
+	PERFORM 1
+	FROM representantes
+	WHERE representante_id = NEW.representante_id
+	FOR UPDATE;
+
+	PERFORM abonar_a_recibos(NEW.representante_id, NEW.monto);
+	UPDATE representantes SET monto_deuda =  monto_deuda- NEW.monto
+	WHERE representante_id =  NEW.representante_id;
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION procesar_recibo_nuevo()
+RETURNS TRIGGER AS $$ 
+DECLARE
+	v_id_representante INT;
+	v_deuda_anterior DECIMAL(10,2);
+
+BEGIN
+	SELECT representante_id INTO v_id_representante FROM alumnos
+	WHERE alumno_id =  NEW.alumno_id;
+
+	SELECT monto_deuda INTO v_deuda_anterior FROM representantes
+	WHERE representante_id = v_id_representante
+	FOR UPDATE;
+
+	UPDATE representantes SET monto_deuda =  monto_deuda + NEW.monto_total
+	WHERE representante_id = v_id_representante;
+
+	IF v_deuda_anterior < 0 THEN
+		PERFORM abonar_a_recibos(v_id_representante, -v_deuda_anterior);
+	END IF;
+
+	RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE TRIGGER trg_estado_recibo
+BEFORE INSERT OR UPDATE OF monto_pagado, monto_total ON recibos_cobro
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_estado_recibo();
+
+
+CREATE OR REPLACE TRIGGER trg_aplicar_pago
+AFTER INSERT ON pagos_representantes
+FOR EACH ROW
+EXECUTE FUNCTION aplicar_pago_recibos();
+
+CREATE OR REPLACE TRIGGER trg_procesar_recibo_nuevo
+AFTER INSERT ON recibos_cobro
+FOR EACH ROW 
+EXECUTE FUNCTION procesar_recibo_nuevo();
+
+
+
