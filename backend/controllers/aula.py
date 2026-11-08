@@ -1,7 +1,9 @@
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from models.aula import Aula
-from schemas.aula import AulaCreate, AulaUpdate
+from sqlalchemy.orm import Session
+
+from backend.models.aula import Aula
+from backend.schemas.aula import AulaCreate, AulaUpdate
+
 
 def crear_aula(db: Session, datos: AulaCreate) -> Aula | None:
     try:

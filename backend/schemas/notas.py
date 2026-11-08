@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
+
 # Creación de nota
 class NotaCreate(BaseModel):
     inscripcion_id: int = Field(gt=0)

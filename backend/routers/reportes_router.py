@@ -1,14 +1,14 @@
-from fastapi import APIRouter, Body
-from backend.controllers import reportes_controller
-from typing import Optional
 
-from backend.schemas.reportes_schema import(
-    DetallePerLapso,
-    DetalleFinAnio,
+from fastapi import APIRouter
+
+from backend.controllers import reportes_controller
+from backend.schemas.reportes_schema import (
     CobroDeudas,
-    RecibosPendientes2, 
+    DetalleFinAnio,
+    DetallePerLapso,
+    RecibosPendientes2,
     ReporteAcademico,
-    ReporteFinanciaro
+    ReporteFinanciaro,
 )
 
 router = APIRouter(
@@ -44,18 +44,18 @@ async def obtener_recibos_pendientes():
 
 @router.get("/academico", response_model=ReporteAcademico)
 async def obtener_reporte_academico(
-    periodo_escolar: Optional[str]= None,
-    lapso_inicio: Optional[int] = None,
-    lapso_fin: Optional[int] = None,
-    grado: Optional[int] = None,
-    seccion: Optional[str] = None,
-    materia: Optional[str] = None,
-    profesor: Optional[str] = None
+    periodo_escolar: str | None= None,
+    lapso_inicio: int | None = None,
+    lapso_fin: int | None = None,
+    grado: int | None = None,
+    seccion: str | None = None,
+    materia: str | None = None,
+    profesor: str | None = None
     ):
     return await reportes_controller.obtenerInformacion(periodo_escolar, lapso_inicio, lapso_fin, grado, seccion, materia, profesor)
 
 @router.get("/finanzas", response_model=ReporteFinanciaro)
-async def obtener_reporte_finanzas(limit: Optional[int] = None):
+async def obtener_reporte_finanzas(limit: int | None = None):
     return await reportes_controller.ObtenerDatosFinanzas(limit)
 
 

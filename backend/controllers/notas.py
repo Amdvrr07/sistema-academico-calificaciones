@@ -1,14 +1,17 @@
-from sqlalchemy import func, select, text
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.utils import confirmar
-from exceptions import Conflicto, NoEncontrado
-from models.inscripcion import Inscripcion
-from models.notas import Nota
-from schemas.notas import NotaCreate, NotaUpdate
+from backend.controllers.utils import confirmar
+from backend.exceptions import Conflicto, NoEncontrado
+from backend.models.inscripcion import Inscripcion
+from backend.models.notas import Nota
+from backend.models.usuario import Usuario
+from backend.schemas.notas import NotaCreate, NotaUpdate
 
 MENSAJE_LAPSO = "Ya existe una nota para esa inscripción en ese lapso"
 
+# MODIIFICADO: Error C4 se eliminaron las lineas 65 - 68 que lanzban AtributeError antes de siquiera empezar la consulta
+# se importa ahora el models de usuario, para darle funcionamiento al cambio de notas y a auditorias
 
 async def _lapso_ocupado(
     db: AsyncSession,
@@ -62,10 +65,9 @@ async def actualizar_nota(
         raise Conflicto(MENSAJE_LAPSO)
 
     if cambios.get("calificacion") is not None and cambios["calificacion"] != nota.calificacion:
-        usuario_existe = await db.execute(
-            text("SELECT 1 FROM usuarios WHERE usuario_id = :usuario_id"),
-            {"usuario_id": usuario_id},
-        ).scalar_one_or_none()
+        usuario_existe = await db.scalar(
+    select(Usuario.usuario_id).where(Usuario.usuario_id == usuario_id)
+)
         if usuario_existe is None:
             raise NoEncontrado(f"El usuario {usuario_id} no existe")
         await db.execute(

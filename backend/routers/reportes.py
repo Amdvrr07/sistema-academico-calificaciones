@@ -1,29 +1,31 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import Session
 
-from database import get_db_session
-from models.notas import Nota
-from models.inscripcion import Inscripcion
-from models.alumno import Alumno
-from models.bloque import Bloque 
-from models.aula import Aula
-from models.profesor import Profesor
-from schemas.reportes_schema import ReporteEstudiantes, ReportePromedio, ReporteGeneral
-
+from backend.database import get_db
+from backend.models.alumno import Alumno
+from backend.models.aula import Aula
+from backend.models.bloque import Bloque
+from backend.models.notas import Nota
+from backend.models.profesor import Profesor
+from backend.schemas.reportes_schema import (
+    ReporteEstudiantes,
+    ReporteGeneral,
+    ReportePromedio,
+)
 
 router = APIRouter(prefix="/reportes", tags=["Reportes"])
 
 
 @router.get("/estudiantes", response_model=ReporteEstudiantes)
-def reporte_estudiantes(db: Session = Depends(get_db_session)):
+def reporte_estudiantes(db: Session = Depends(get_db)):
     # Devuelve el total de estudiantes registrados en el sistema.
     total = db.query(func.count(Alumno.alumno_id)).scalar()
     return ReporteEstudiantes(total_estudiantes=total)
 
 
 @router.get("/promedio/{inscripcion_id}", response_model=ReportePromedio)
-def reporte_promedio_inscripcion(inscripcion_id: int, db: Session = Depends(get_db_session)):
+def reporte_promedio_inscripcion(inscripcion_id: int, db: Session = Depends(get_db)):
     # Calcula el promedio de notas de una inscripción específica.
     promedio = (
         db.query(func.avg(Nota.calificacion))
@@ -39,7 +41,7 @@ def reporte_promedio_inscripcion(inscripcion_id: int, db: Session = Depends(get_
 
 
 @router.get("/general", response_model=ReporteGeneral)
-def reporte_general(db: Session = Depends(get_db_session)):
+def reporte_general(db: Session = Depends(get_db)):
     # Genera un reporte general: total de estudiantes, aprobados y reprobados (nota mínima de aprobación: 10).
     NOTA_APROBACION = 10.0
 
@@ -74,18 +76,18 @@ def reporte_general(db: Session = Depends(get_db_session)):
 
 
 @router.get("/horarios")
-def reporte_horarios(db: Session = Depends(get_db_session)):
+def reporte_horarios(db: Session = Depends(get_db)):
     # Devuelve el listado completo de bloques horarios registrados.
     return db.query(Bloque).all()
 
 
 @router.get("/aulas")
-def reporte_aulas(db: Session = Depends(get_db_session)):
+def reporte_aulas(db: Session = Depends(get_db)):
     # Devuelve el listado completo de aulas con su disponibilidad.
     return db.query(Aula).all()
 
 
 @router.get("/docentes")
-def reporte_docentes(db: Session = Depends(get_db_session)):
+def reporte_docentes(db: Session = Depends(get_db)):
     # Devuelve el listado completo de profesores registrados.
     return db.query(Profesor).all()

@@ -1,10 +1,25 @@
-from sqlalchemy.future import select
-from backend.database import get_db_session 
-import models.reportes_model as modelo
-from backend.schemas.reportes_schema import NotasDetalle, DetallePerLapso, DetalleFinAnio, Materias, RecibosPendientes, CobroDeudas, RecibosPendientes2, ReporteAcademico, DeudaMes, DeudaRepresentante,DeudaAlumno,DeudaCurso,DeudaGrado, ReporteFinanciaro
-from sqlalchemy import select, extract, func, and_
 
-from typing import Optional
+import models.reportes_model as modelo
+from sqlalchemy import and_, extract, func
+from sqlalchemy.future import select
+
+from backend.database import get_db_session
+from backend.schemas.reportes_schema import (
+    CobroDeudas,
+    DetalleFinAnio,
+    DetallePerLapso,
+    DeudaAlumno,
+    DeudaCurso,
+    DeudaGrado,
+    DeudaMes,
+    DeudaRepresentante,
+    Materias,
+    NotasDetalle,
+    RecibosPendientes,
+    RecibosPendientes2,
+    ReporteAcademico,
+    ReporteFinanciaro,
+)
 
 
 async def obtenerNotasFinLapso(lapso:int, periodo_actual: str):
@@ -257,13 +272,13 @@ async def obtenerRecibosPendientes():
         return objeto_recibos_pendientes
 
 async def obtenerInformacion(
-        periodo_escolar: Optional[str] = None,
-        lapso_inicio: Optional[int] = None,
-        lapso_fin: Optional[int] = None,
-        grado: Optional[int] = None,
-        seccion: Optional[str]=None,
-        materia: Optional[str]=None,
-        profesor: Optional[str]= None,
+        periodo_escolar: str | None = None,
+        lapso_inicio: int | None = None,
+        lapso_fin: int | None = None,
+        grado: int | None = None,
+        seccion: str | None=None,
+        materia: str | None=None,
+        profesor: str | None= None,
 
 ):
     async with get_db_session() as db:
@@ -321,10 +336,8 @@ async def obtenerInformacion(
                 aprobados+=1
             else:
                 reprobados+=1
-            if promedio> mejor_promedio:
-                mejor_promedio=promedio
-            if promedio < peor_promedio:
-                peor_promedio = promedio
+            mejor_promedio = max(mejor_promedio, promedio)
+            peor_promedio = min(peor_promedio, promedio)
             promedio_notas_total+=promedio
         promedio_notas_total = promedio_notas_total/cantidad_total_alumnos
 
@@ -346,7 +359,7 @@ async def obtenerInformacion(
         )
         return objeto_reporte
 
-async def obtenerDatosFinanzas(limit:Optional[int] = None):
+async def obtenerDatosFinanzas(limit:int | None = None):
     async with get_db_session() as db:
         saldo_pendiente = func.sum(modelo.ReciboCobro.monto_total-modelo.ReciboCobro.monto_pagado)
 

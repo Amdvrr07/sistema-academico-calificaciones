@@ -3,6 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from .base import Base
 
+
 # Equivalente a tabla 'materias'
 class Materia(Base):
     __tablename__ = "materias"

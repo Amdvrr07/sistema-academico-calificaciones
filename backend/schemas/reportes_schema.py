@@ -1,6 +1,6 @@
+
 from pydantic import BaseModel
-from typing import List, Union
- 
+
 
 # Desarrollando el envio de la informacion 
 # de los estudiantes luego de finalizar el lapso
@@ -22,7 +22,7 @@ class DetallePerLapso(BaseModel):
     periodo_escolar: str
     anio_cursando: int
     lapso_culminado: int
-    notas: List[NotasDetalle]
+    notas: list[NotasDetalle]
 
 class DetalleFinAnio(BaseModel):
     nombre_alumno:str
@@ -31,8 +31,8 @@ class DetalleFinAnio(BaseModel):
     periodo_escolar: str
     anio_cursando: int
     promedio_periodo: float
-    notas: List[NotasDetalle]
-    materias_reparar: List[Materias]
+    notas: list[NotasDetalle]
+    materias_reparar: list[Materias]
 
 class RecibosPendientes(BaseModel):
     id_recibo: int
@@ -64,13 +64,13 @@ class CobroDeudas(BaseModel):
     nombre_representante:str
     deuda:float
     correo:str
-    recibos:List[RecibosPendientes]
+    recibos:list[RecibosPendientes]
 
 class ReporteAcademico(BaseModel):
     filtro_periodo_escolar: str 
     filtro_lapso_inicio: int = 1
     filtro_lapso_fin: int = 3
-    filtro_grado:Union[int, str] 
+    filtro_grado:int | str 
     filtro_seccion: str
     filtro_materia: str 
     filtro_profesor:str 
@@ -111,11 +111,11 @@ class ReporteFinanciaro(BaseModel):
     monto_total_pagado: float
     monto_deuda_total: float
     cantidad_recibos_deuda: int
-    deudas_meses: List[DeudaMes]
-    deudas_representantes: List[DeudaRepresentante]
-    deudas_alumnos: List[DeudaAlumno]
-    deudas_cursos: List[DeudaCurso]
-    deudas_grados: List[DeudaGrado]
+    deudas_meses: list[DeudaMes]
+    deudas_representantes: list[DeudaRepresentante]
+    deudas_alumnos: list[DeudaAlumno]
+    deudas_cursos: list[DeudaCurso]
+    deudas_grados: list[DeudaGrado]
 
 # Total de estudiantes
 class ReporteEstudiantes(BaseModel):

@@ -1,12 +1,14 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.utils import confirmar
-from exceptions import Conflicto, NoEncontrado
-from models.materia import Materia
-from schemas.materia import MateriaCreate, MateriaUpdate
+from backend.controllers.utils import confirmar
+from backend.exceptions import Conflicto, NoEncontrado
+from backend.models.materia import Materia
+from backend.schemas.materia import MateriaCreate, MateriaUpdate
 
-# Cambio: Se aceptaron todos los cambios del grupo 2, excepto el de eliminar_materia()
+# MODIFICADO: Error C3 se eliminaron las  lineas de codigo muerto y se resolvio las corrutinas por el await olvidado
+# y se corrigio la session de eliminar_materia para que sea AsyncSession
+
 async def _codigo_en_uso(
     db: AsyncSession, codigo: str, excluir_id: int | None = None
 ) -> bool:
@@ -73,12 +75,8 @@ async def actualizar_materia(
     await confirmar(db, "No se pudo actualizar la materia")
     await db.refresh(materia)
     return materia
-
- # Cambio: Se descartó la funcionalidad de no eliminar materia, si el hay estudiantes inscritos, pero ahora eliminar_materia() no retorna nada  
-def eliminar_materia(db: Session, materia_id: int) -> None:
-    materia = obtener_materia(db, materia_id)
-    if materia is None:
-        return None
-
-    db.delete(materia)
-    db.commit()
+  
+async def eliminar_materia(db: AsyncSession, materia_id: int) -> None:
+    materia = await obtener_materia(db, materia_id)
+    await db.delete(materia)
+    await db.commit()

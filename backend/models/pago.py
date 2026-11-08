@@ -1,7 +1,10 @@
-from sqlalchemy import Integer, Numeric, String, Date, CheckConstraint, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
 from datetime import date
+
+from sqlalchemy import CheckConstraint, Date, ForeignKey, Integer, Numeric, String
+from sqlalchemy.orm import Mapped, mapped_column
+
 from .base import Base
+
 
 class Pago(Base):
     __tablename__ = "pagos"

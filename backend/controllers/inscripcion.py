@@ -1,14 +1,16 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.utils import confirmar
-from exceptions import Conflicto, NoEncontrado
-from models.alumno import Alumno
-from models.curso import Curso
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from models.inscripcion import Inscripcion
-from schemas.inscripcion import InscripcionCreate, InscripcionUpdate
+from backend.controllers.utils import confirmar
+from backend.exceptions import Conflicto, NoEncontrado
+from backend.models.alumno import Alumno
+from backend.models.curso import Curso
+from backend.models.inscripcion import Inscripcion
+from backend.models.materia import Materia
+from backend.schemas.inscripcion import InscripcionCreate, InscripcionUpdate
+
+# MODIIFICADO: Error C2 se eliminaron las dependecias sync y se importo el models de Materia
+
 
 async def _verificar_referencias(
     db: AsyncSession,
@@ -105,57 +107,3 @@ async def eliminar_inscripcion(db: AsyncSession, id_inscripcion: int) -> None:
     await db.delete(inscripcion)
     await confirmar(db, "No se pudo eliminar la inscripción")
 
-def registrar_inscripcion(db: Session, datos: InscripcionCreate) -> Inscripcion:
-    inscripcion = db.query(Inscripcion).filter(
-        Inscripcion.alumno_id == datos.alumno_id,
-        Inscripcion.materia_id == datos.materia_id
-    ).first()
-
-    if inscripcion:
-        return None
-
-    try:
-        inscripcion = Inscripcion(**datos.model_dump())
-        db.add(inscripcion)
-        db.commit()
-        db.refresh(inscripcion)
-        return inscripcion
-    except IntegrityError:
-        db.rollback()
-        return None
-
-
-def obtener_inscripcion(db: Session, inscripcion_id: int) -> Inscripcion | None:
-    return db.get(Inscripcion, inscripcion_id)
-
-
-def listar_inscripciones(db: Session) -> list[Inscripcion]:
-    return db.query(Inscripcion).all()
-
-
-def actualizar_inscripcion(
-    db: Session,
-    inscripcion_id: int,
-    datos: InscripcionUpdate,
-) -> Inscripcion | None:
-    inscripcion = obtener_inscripcion(db, inscripcion_id)
-    if inscripcion is None:
-        return None
-
-    cambios = datos.model_dump(exclude_unset=True, exclude_none=True)
-    for campo, valor in cambios.items():
-        setattr(inscripcion, campo, valor)
-
-    db.commit()
-    db.refresh(inscripcion)
-    return inscripcion
-
-
-def eliminar_inscripcion(db: Session, inscripcion_id: int) -> Inscripcion | None:
-    inscripcion = obtener_inscripcion(db, inscripcion_id)
-    if inscripcion is None:
-        return None
-
-    db.delete(inscripcion)
-    db.commit()
-    return inscripcion

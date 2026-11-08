@@ -1,6 +1,8 @@
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
 from .base import Base
+
 
 # Equivalente a tabla 'representantes'
 class Representante(Base):

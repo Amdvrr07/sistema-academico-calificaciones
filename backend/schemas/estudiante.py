@@ -1,5 +1,6 @@
+
 from pydantic import BaseModel
-from datetime import date
+
 
 class EstudianteCrear(BaseModel):
     nombre: str

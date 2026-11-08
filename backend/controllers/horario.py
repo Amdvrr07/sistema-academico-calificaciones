@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
-from models.bloque import Bloque
-from models.curso import Curso
+
+from backend.models.bloque import Bloque
+from backend.models.curso import Curso
+
 
 def crear_horario(db: Session, datos: dict) -> dict:
     nuevo_horario = Bloque(**datos)

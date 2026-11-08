@@ -1,25 +1,27 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from database import engine
-from models.base import Base
-from routers import inscripcion, materias, notas, horarios, calificaciones, reportes, aulas
 
-# Aplicar manejo de excepciones para la conexión con base de datos
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Aviso: No se pudo conectar a la base de datos para crear tablas: {e}")
-
+from backend.routers import (
+  #  aulas,
+    auth,
+  #  calificaciones,
+   # horarios,
+    inscripcion,
+    materias,
+    notas,
+    #reportes,
+)
 
 # Inicializar servidor fastAPI
 app = FastAPI()
 app.include_router(inscripcion.router)
 app.include_router(materias.router)
 app.include_router(notas.router)
-app.include_router(horarios.router)
-app.include_router(aulas.router)
-app.include_router(calificaciones.router)
-app.include_router(reportes.router)
+#app.include_router(horarios.router)
+#app.include_router(aulas.router)
+#app.include_router(calificaciones.router)
+#app.include_router(reportes.router)
+app.include_router(auth.router)
 
 
 origenes = [

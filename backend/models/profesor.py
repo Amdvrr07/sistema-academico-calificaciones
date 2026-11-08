@@ -1,7 +1,7 @@
-from sqlalchemy import String, ForeignKey, Numeric, CheckConstraint
+from sqlalchemy import CheckConstraint, ForeignKey, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
-from .base import Base
 
+from .base import Base
 
 
 class Profesor(Base):

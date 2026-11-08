@@ -1,3 +1,6 @@
+from datetime import datetime
+from decimal import Decimal
+
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
@@ -8,10 +11,9 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from decimal import Decimal
-from datetime import datetime
 
 from .base import Base
+
 
 # Equivalente a tabla 'notas'
 class Nota(Base):
