@@ -1,14 +1,14 @@
-
-from fastapi import APIRouter
-
-from backend.controllers import reportes_controller
-from backend.schemas.reportes_schema import (
-    CobroDeudas,
-    DetalleFinAnio,
+from fastapi import APIRouter, Body
+from controllers import reportes_controller
+from typing import Optional
+from fastapi.responses import JSONResponse
+from schemas.reportes_schema import(
     DetallePerLapso,
-    RecibosPendientes2,
+    DetalleFinAnio,
+    CobroDeudas,
+    RecibosPendientes2, 
     ReporteAcademico,
-    ReporteFinanciaro,
+    ReporteFinanciaro, ReportesAcademico
 )
 
 router = APIRouter(
@@ -44,19 +44,34 @@ async def obtener_recibos_pendientes():
 
 @router.get("/academico", response_model=ReporteAcademico)
 async def obtener_reporte_academico(
-    periodo_escolar: str | None= None,
-    lapso_inicio: int | None = None,
-    lapso_fin: int | None = None,
-    grado: int | None = None,
-    seccion: str | None = None,
-    materia: str | None = None,
-    profesor: str | None = None
+    periodo_escolar: Optional[str]= None,
+    lapso_inicio: Optional[int] = None,
+    lapso_fin: Optional[int] = None,
+    grado: Optional[int] = None,
+    seccion: Optional[str] = None,
+    materia: Optional[str] = None,
+    profesor: Optional[str] = None
     ):
     return await reportes_controller.obtenerInformacion(periodo_escolar, lapso_inicio, lapso_fin, grado, seccion, materia, profesor)
 
 @router.get("/finanzas", response_model=ReporteFinanciaro)
-async def obtener_reporte_finanzas(limit: int | None = None):
-    return await reportes_controller.ObtenerDatosFinanzas(limit)
+async def obtener_reporte_finanzas(limit: Optional[int] = None):
+    return await reportes_controller.obtenerDatosFinanzas(limit)
 
+
+@router.get("/reporte/academico", response_model=ReportesAcademico)
+async def obtenener_reporte_financiero2(periodo_escolar: Optional[str] =  None, criterio_agrupacion:str = 'periodo_escolar'):
+    try:
+        return await reportes_controller.obtenerDatosAcademicos(criterio_agrupacion, periodo_escolar)
+    except ValueError:
+        return JSONResponse(
+            status_code=300,
+            content={"error":"Criterio no valido para generar el reporte."}
+        )
+    except NameError:
+        return JSONResponse(
+            status_code=301,
+            content={"error":"Debe proporcionar el periodo escolar actual."}
+        )
 
 

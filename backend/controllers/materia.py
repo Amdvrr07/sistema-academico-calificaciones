@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from backend.controllers.utils import confirmar
 from backend.exceptions import Conflicto, NoEncontrado

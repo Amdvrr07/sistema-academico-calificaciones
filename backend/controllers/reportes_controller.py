@@ -1,26 +1,13 @@
-
-import models.reportes_model as modelo
-from sqlalchemy import and_, extract, func
 from sqlalchemy.future import select
+from database import get_db_session
+import models as modelo
+from schemas.reportes_schema import NotasDetalle, DetallePerLapso, DetalleFinAnio, Materias, RecibosPendientes, CobroDeudas, RecibosPendientes2, ReporteAcademico, DeudaMes, DeudaRepresentante,DeudaAlumno,DeudaCurso,DeudaGrado, ReporteFinanciaro, ReportesAcademico, ReporteItem
+from sqlalchemy import select, extract, func, and_
+from contextlib import asynccontextmanager
+from database import get_db_session as _get_db_session
 
-from backend.database import get_db_session
-from backend.schemas.reportes_schema import (
-    CobroDeudas,
-    DetalleFinAnio,
-    DetallePerLapso,
-    DeudaAlumno,
-    DeudaCurso,
-    DeudaGrado,
-    DeudaMes,
-    DeudaRepresentante,
-    Materias,
-    NotasDetalle,
-    RecibosPendientes,
-    RecibosPendientes2,
-    ReporteAcademico,
-    ReporteFinanciaro,
-)
-
+from typing import Optional
+get_db_session = asynccontextmanager(_get_db_session)
 
 async def obtenerNotasFinLapso(lapso:int, periodo_actual: str):
     async with get_db_session() as db:
@@ -103,9 +90,11 @@ async def obtenerNotasFinAnio(periodo_actual: str):
             alumno_id = nota['alumno_id']
             materia = nota['nombre']
             calificacion = float(nota['calificacion'])
-            notas_alumnos[alumno_id].append(calificacion)
             if materia not in notas_materias[alumno_id]:
-                notas_materias[alumno_id][materia].append(calificacion)
+                notas_materias[alumno_id][materia]=[]
+            notas_alumnos[alumno_id].append(calificacion)
+            notas_materias[alumno_id][materia].append(calificacion)
+            
         promedios = {}
 
         for alumno_id, lista_notas in notas_alumnos.items():
@@ -222,9 +211,10 @@ async def cobrarDeuda():
                         id_alumno=recibo['alumno_id'],
                         nombre_alumno=recibo['nombre'],
                         grado=recibo['grado'],
+                        concepto=recibo['concepto'],
                         monto_pagado=float(recibo['monto_pagado']),
                         monto_total=float(recibo['monto_total']),
-                        monto_faltante= float(recibo['monto_total'])- float(recibo['monto_pagado'])
+                        monto_faltante= (float(recibo['monto_total'])- float(recibo['monto_pagado']))
                         # Falta Fecha
                     )
                     recibos.append(objeto_recibo)
@@ -272,13 +262,13 @@ async def obtenerRecibosPendientes():
         return objeto_recibos_pendientes
 
 async def obtenerInformacion(
-        periodo_escolar: str | None = None,
-        lapso_inicio: int | None = None,
-        lapso_fin: int | None = None,
-        grado: int | None = None,
-        seccion: str | None=None,
-        materia: str | None=None,
-        profesor: str | None= None,
+        periodo_escolar: Optional[str] = None,
+        lapso_inicio: Optional[int] = None,
+        lapso_fin: Optional[int] = None,
+        grado: Optional[int] = None,
+        seccion: Optional[str]=None,
+        materia: Optional[str]=None,
+        profesor: Optional[str]= None,
 
 ):
     async with get_db_session() as db:
@@ -336,8 +326,10 @@ async def obtenerInformacion(
                 aprobados+=1
             else:
                 reprobados+=1
-            mejor_promedio = max(mejor_promedio, promedio)
-            peor_promedio = min(peor_promedio, promedio)
+            if promedio> mejor_promedio:
+                mejor_promedio=promedio
+            if promedio < peor_promedio:
+                peor_promedio = promedio
             promedio_notas_total+=promedio
         promedio_notas_total = promedio_notas_total/cantidad_total_alumnos
 
@@ -359,7 +351,7 @@ async def obtenerInformacion(
         )
         return objeto_reporte
 
-async def obtenerDatosFinanzas(limit:int | None = None):
+async def obtenerDatosFinanzas(limit:Optional[int] = None):
     async with get_db_session() as db:
         saldo_pendiente = func.sum(modelo.ReciboCobro.monto_total-modelo.ReciboCobro.monto_pagado)
 
@@ -488,14 +480,93 @@ async def obtenerDatosFinanzas(limit:int | None = None):
         )
         return reporte_objeto
         
+async def obtenerDatosAcademicos( criterio_agrupacion: str= 'periodo_escolar', periodo_escolar_actual:Optional[str]= None):
+    # Criterios de agrupacion Permitidos
+    # Periodo Escolar -> periodo_escolar
+    # Lapso (En el periodo escolar actual) -> lapso
+    # Curso -> cutso
+    # Grado -> grado
+    # Profesor -> profesor
+    # Materia -> materia
+    # Se tendra el promedio, mejor nota, peor nota.
+    # El limite es opcional, puede ser positivo o negativo, si es positivo se toma el top mejores
+    # Si es negativo se toma el top peores en orden
+    async with get_db_session() as db:
+        criterio = ""
 
+        if (criterio_agrupacion =="periodo_escolar" ):
+            criterio = "Periodo Escolar"
+            consulta  = select(
+                func.avg(modelo.Nota.calificacion).label('promedio'),
+                modelo.Curso.periodo_escolar.label('valor')
+            ).select_from(modelo.Nota).join(modelo.Inscripcion, modelo.Inscripcion.inscripcion_id == modelo.Nota.inscripcion_id).join(modelo.Curso, modelo.Curso.curso_id == modelo.Inscripcion.curso_id).group_by(modelo.Curso.periodo_escolar)
+        elif (criterio_agrupacion == "curso"):
+            
+            if periodo_escolar_actual:
+                criterio = "Curso"
+                consulta = select(
+                    func.avg(modelo.Nota.calificacion).label('promedio'),
+                    func.concat(modelo.Curso.grado, '-', modelo.Curso.seccion).label('valor')
+                ).select_from(modelo.Nota).join(modelo.Inscripcion, modelo.Inscripcion.inscripcion_id == modelo.Nota.inscripcion_id).join(modelo.Curso, modelo.Curso.curso_id == modelo.Inscripcion.curso_id).where(periodo_escolar_actual == modelo.Curso.periodo_escolar).group_by(modelo.Curso.grado, modelo.Curso.seccion)
+        elif (criterio_agrupacion == "grado"):
+            if periodo_escolar_actual:
+                criterio="Grado"
+                consulta =  select(
+                    func.avg(modelo.Nota.calificacion).label('promedio'),
+                    modelo.Curso.grado.label('valor')
+                ).select_from(modelo.Nota).join(modelo.Inscripcion, modelo.Inscripcion.inscripcion_id==  modelo.Nota.inscripcion_id).join(modelo.Curso, modelo.Curso.curso_id == modelo.Inscripcion.curso_id).where(periodo_escolar_actual == modelo.Curso.periodo_escolar).group_by(modelo.Curso.grado)
+            
+        elif (criterio_agrupacion == "profesor"):
+            if periodo_escolar_actual:
+                criterio="Profesor"
+                consulta = (
+                    select(
+                        func.avg(modelo.Nota.calificacion).label('promedio'),
+                        modelo.Profesor.nombre.label('valor')
+                    ).select_from(modelo.Nota)
+                    .join(modelo.Inscripcion, modelo.Inscripcion.inscripcion_id == modelo.Inscripcion.inscripcion_id).join(modelo.Curso, modelo.Curso.curso_id == modelo.Inscripcion.curso_id)
+                    .join(modelo.CursoProfesor, modelo.CursoProfesor.curso_id == modelo.Curso.curso_id)
+                    .join(modelo.Profesor, modelo.Profesor.profesor_id == modelo.CursoProfesor.profesor_id).where(periodo_escolar_actual == modelo.Curso.periodo_escolar)
+                    .group_by(modelo.Profesor.nombre)
+                )
+        elif (criterio_agrupacion =="materia"):
+            if periodo_escolar_actual:
+                criterio="Materia"
+                consulta = (
+                    select(
+                        func.avg(modelo.Nota.calificacion).label('promedio'),
+                        modelo.Materia.nombre.label('valor')
+                    ).select_from(modelo.Nota)
+                    .join(modelo.Inscripcion, modelo.Inscripcion.inscripcion_id == modelo.Nota.inscripcion_id)
+                    .join(modelo.Curso, modelo.Curso.curso_id == modelo.Inscripcion.curso_id)
+                    .join(modelo.Materia, modelo.Inscripcion.materia_id == modelo.Materia.materia_id)
+                    .where(periodo_escolar_actual == modelo.Curso.periodo_escolar)
+                    .group_by(modelo.Materia.nombre)
+                )
+        elif criterio_agrupacion == "lapso":
+            if periodo_escolar_actual:
+                criterio = "Lapso"
+                consulta =  select(
+                    func.avg(modelo.Nota.calificacion).label('promedio'),
+                    modelo.Nota.lapso.label('valor')
+                ).select_from(modelo.Nota).join(modelo.Inscripcion, modelo.Inscripcion.inscripcion_id == modelo.Nota.inscripcion_id).join(modelo.Curso, modelo.Curso.curso_id== modelo.Inscripcion.curso_id).where(periodo_escolar_actual == modelo.Curso.periodo_escolar).group_by(modelo.Nota.lapso)
 
-                
+        else:
+            raise ValueError
+        if not criterio:
+            raise NameError
+        datos =(await db.execute(consulta)).mappings().all()
+        datos_items =  []
+        for dato in datos:
+            objeto_dato = ReporteItem(
+                nombre_item=str(dato['valor']),
+                promedio=float(dato['promedio'])
+            )
+            datos_items.append(objeto_dato)
+        objeto_reporte = ReportesAcademico(
+            agrupado_por=criterio,
+            datos=datos_items
+        )
 
-
-                        
-
-
-
-
-                    
+        return objeto_reporte
+        
