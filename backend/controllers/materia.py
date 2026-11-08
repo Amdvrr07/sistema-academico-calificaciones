@@ -1,6 +1,5 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import Session
 
 from controllers.utils import confirmar
 from exceptions import Conflicto, NoEncontrado
@@ -76,7 +75,7 @@ async def actualizar_materia(
     return materia
 
  # Cambio: Se descartó la funcionalidad de no eliminar materia, si el hay estudiantes inscritos, pero ahora eliminar_materia() no retorna nada  
-def eliminar_materia(db: Session, materia_id: int) -> None:
+async def eliminar_materia(db: AsyncSession, materia_id: int) -> None:
     materia = obtener_materia(db, materia_id)
     if materia is None:
         return None
