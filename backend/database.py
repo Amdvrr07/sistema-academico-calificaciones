@@ -1,12 +1,12 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import declarative_base
 from dotenv import load_dotenv
 import os
+from backend.models.base import Base
 
 load_dotenv()
 
 # Variables de entorno del contenedor de Docker
-host = os.getenv("DB_HOST")
+host = os.getenv("DB_HOST") or os.getenv("POSTGRES_HOST", "database")
 user = os.getenv("DB_USER")
 password = os.getenv("DB_PASSWORD")
 db = os.getenv("DB_NAME")
@@ -20,7 +20,6 @@ DB_URL = os.getenv(
 
 # Actua como puerto de entrada y base de conexiones entre la base de datos y el backend en Python
 engine = create_async_engine(DB_URL, echo=True)
-Base = declarative_base()
 # Creación de sesión asíncrona, la cual gestiona operaciones de lectura y escritura, así como las transacciones
 SessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
 
