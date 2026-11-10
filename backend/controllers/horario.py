@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.bloque import Bloque
-from models.curso import Curso
+from backend.models.bloque import Bloque
+from backend.models.curso import Curso
 
 def crear_horario(db: AsyncSession, datos: dict) -> dict:
     nuevo_horario = Bloque(**datos)
