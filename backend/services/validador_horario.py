@@ -2,7 +2,7 @@ from datetime import time
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from fastapi import HTTPException
-from models.bloque import Bloque
+from backend.models.bloque import Bloque
 async def hay_choque_horario( # Función asíncrona para validar choques de horarios
     db: AsyncSession,
     dia: str,
