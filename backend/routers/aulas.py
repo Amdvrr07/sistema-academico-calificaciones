@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.aula import (
+from backend.controllers.aula import (
     crear_aula, obtener_aula, listar_aulas,
     actualizar_aula, eliminar_aula,
 )
-from database import get_db_session
-from schemas.aula import AulaCreate, AulaUpdate, AulaRead
+from backend.database import get_db_session
+from backend.schemas.aula import AulaCreate, AulaUpdate, AulaRead
 
 router = APIRouter(prefix="/aulas", tags=["Aulas"])
 

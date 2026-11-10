@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.notas import (
+from backend.controllers.notas import (
     registrar_nota, obtener_nota, listar_notas,
     actualizar_nota, eliminar_nota,
 )
-from database import get_db_session
-from schemas.notas import NotaCreate, NotaUpdate, NotaRead
+from backend.database import get_db_session
+from backend.schemas.notas import NotaCreate, NotaUpdate, NotaRead
 
 router = APIRouter(prefix="/calificaciones", tags=["Calificaciones"])
 

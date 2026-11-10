@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.materia import (
+from backend.controllers.materia import (
     actualizar_materia,
     eliminar_materia,
     listar_materias,
     obtener_materia,
     registrar_materia,
 )
-from database import get_db_session
-from schemas.materia import MateriaCreate, MateriaRead, MateriaUpdate
+from backend.database import get_db_session
+from backend.schemas.materia import MateriaCreate, MateriaRead, MateriaUpdate
 
 router = APIRouter(prefix="/materias", tags=["Materias"])
 
