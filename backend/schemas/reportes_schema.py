@@ -122,5 +122,5 @@ class ReporteItem(BaseModel):
     promedio: float
 class ReportesAcademico(BaseModel):
     agrupado_por: str
-    datos: List[ReporteItem]
+    datos: list[ReporteItem]
 

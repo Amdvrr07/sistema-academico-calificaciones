@@ -20,9 +20,10 @@ async def _verificar_referencias(
 ) -> None:
     materia = await db.get(Materia, materia_id) if materia_id is not None else None
     curso = await db.get(Curso, curso_id) if curso_id is not None else None
+    alumno = await db.get(Alumno, alumno_id) if curso_id is not None else None
     if materia_id is not None and materia is None:
         raise NoEncontrado(f"La materia {materia_id} no existe")
-    if alumno_id is not None and await db.get(Alumno, alumno_id) is None:
+    if alumno_id is not None and alumno is None:
         raise NoEncontrado(f"El alumno {alumno_id} no existe")
     if curso_id is not None and curso is None:
         raise NoEncontrado(f"El curso {curso_id} no existe")

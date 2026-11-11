@@ -1,10 +1,10 @@
 from sqlalchemy.future import select
-from database import get_db_session
-import models as modelo
-from schemas.reportes_schema import NotasDetalle, DetallePerLapso, DetalleFinAnio, Materias, RecibosPendientes, CobroDeudas, RecibosPendientes2, ReporteAcademico, DeudaMes, DeudaRepresentante,DeudaAlumno,DeudaCurso,DeudaGrado, ReporteFinanciaro, ReportesAcademico, ReporteItem
+from backend.database import get_db_session
+import backend.models as modelo
+from backend.schemas.reportes_schema import NotasDetalle, DetallePerLapso, DetalleFinAnio, Materias, RecibosPendientes, CobroDeudas, RecibosPendientes2, ReporteAcademico, DeudaMes, DeudaRepresentante,DeudaAlumno,DeudaCurso,DeudaGrado, ReporteFinanciaro, ReportesAcademico, ReporteItem
 from sqlalchemy import select, extract, func, and_
 from contextlib import asynccontextmanager
-from database import get_db_session as _get_db_session
+from backend.database import get_db_session as _get_db_session
 
 from typing import Optional
 get_db_session = asynccontextmanager(_get_db_session)
