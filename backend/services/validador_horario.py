@@ -8,7 +8,7 @@ async def hay_choque_horario( # Función asíncrona para validar choques de hora
     dia: str,
     hora_inicio: time,
     hora_fin: time,
-    profesor_id: int,https://github.com/aleRM9/sistema-gestion-escolar/pull/33/conflict?name=backend%252Frouters%252Fmaterias.py&ancestor_oid=dcad042e83a0ad71014b4d6777899a58d35e0806&base_oid=f8dfe6c63f2c58f353b24a5ea0b58fdf37f78988&head_oid=e811f3ce9dc602e219c27916e31287bf82000a7a
+    profesor_id: int,
     aula_id: int,
     curso_id: int,
     excluir_bloque_id: int | None = None,
