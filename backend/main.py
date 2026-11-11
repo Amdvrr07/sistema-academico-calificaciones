@@ -9,9 +9,8 @@ from backend.routers import inscripcion, materias, notas, horarios, calificacion
 from fastapi import HTTPException, status, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
-# Importa aquí tu función/dependencia para obtener la sesión de la BD
 
-
+# Iniciar servidor fastAPI
 app = FastAPI()
 
 @app.get("/health", status_code=status.HTTP_200_OK)
@@ -27,8 +26,6 @@ async def health_check(db: AsyncSession = Depends(get_db_session)):
             detail=f"Database connection failed: {str(e)}"
         )
 
-# Inicializar servidor fastAPI
-#app = FastAPI()
 
 # Evento de inicio para crear las tablas de forma asíncrona y segura
 @app.on_event("startup")
