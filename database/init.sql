@@ -290,7 +290,7 @@ CREATE TABLE IF NOT EXISTS bloques(
 );
 
 -- Auditoria de notas
-CREATE TABLE auditorias_notas(
+CREATE TABLE IF NOT EXISTS auditorias_notas(
 	auditoria_nota_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	nota_id INT NOT NULL,
 	usuario_id INT NOT NULL,

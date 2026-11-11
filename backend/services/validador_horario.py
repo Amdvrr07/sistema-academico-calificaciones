@@ -1,18 +1,14 @@
 from datetime import time
-
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
 from fastapi import HTTPException
-from sqlalchemy import and_
-from sqlalchemy.orm import Session
-
 from backend.models.bloque import Bloque
-
-
 async def hay_choque_horario( # Función asíncrona para validar choques de horarios
-    db: Session,
+    db: AsyncSession,
     dia: str,
     hora_inicio: time,
     hora_fin: time,
-    profesor_id: int,
+    profesor_id: int,https://github.com/aleRM9/sistema-gestion-escolar/pull/33/conflict?name=backend%252Frouters%252Fmaterias.py&ancestor_oid=dcad042e83a0ad71014b4d6777899a58d35e0806&base_oid=f8dfe6c63f2c58f353b24a5ea0b58fdf37f78988&head_oid=e811f3ce9dc602e219c27916e31287bf82000a7a
     aula_id: int,
     curso_id: int,
     excluir_bloque_id: int | None = None,
@@ -49,12 +45,18 @@ async def hay_choque_horario( # Función asíncrona para validar choques de hora
         ),
     }
     for recurso, (condicion_recurso, mensaje) in conflictos.items():
-        choque = (
-            db.query(Bloque)
-            .filter(solapamiento, condicion_recurso, filtro_exclusion)
-            .first()
+        # Construir consulta
+        stmt = (
+            select(Bloque).filter(solapamiento, condicion_recurso, filtro_exclusion)
         )
-        if choque: # Si hay choque
+
+        # Ejecución de consulta de forma asíncrona
+        resultado = await db.execute(stmt)
+
+        # Obtener primer registro de 'Bloque' mapeado bajo la condición de colisión
+        choque = resultado.scalars().first()
+
+        if choque: # Si hay colisión de bloques
             raise HTTPException(
                 status_code=409,
                 detail={

@@ -1,12 +1,10 @@
 from fastapi import HTTPException
 from fastapi_controllers import Controller, delete, get, post, put
 from sqlalchemy.future import select
-
 from backend.database import get_db_session
-from backend.models.base import Aula, Bloque
 from backend.models.profesor import Profesor
+from backend.models.base import Bloque, Aula 
 from backend.services.validador_horario import hay_choque_horario
-
 
 class SecretariaController(Controller):
     

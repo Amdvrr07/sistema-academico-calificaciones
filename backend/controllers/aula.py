@@ -1,11 +1,9 @@
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
-
+from sqlalchemy.ext.asyncio import AsyncSession
 from backend.models.aula import Aula
 from backend.schemas.aula import AulaCreate, AulaUpdate
 
-
-def crear_aula(db: Session, datos: AulaCreate) -> Aula | None:
+async def crear_aula(db: AsyncSession, datos: AulaCreate) -> Aula | None:
     try:
         nueva_aula = Aula(**datos.model_dump())
         db.add(nueva_aula)
@@ -16,13 +14,13 @@ def crear_aula(db: Session, datos: AulaCreate) -> Aula | None:
         db.rollback()
         return None
 
-def listar_aulas(db: Session) -> list[Aula]:
+async  def listar_aulas(db: AsyncSession) -> list[Aula]:
     return db.query(Aula).all()
 
-def obtener_aula(db: Session, aula_id: int) -> Aula | None:
+async def obtener_aula(db: AsyncSession, aula_id: int) -> Aula | None:
     return db.query(Aula).filter(Aula.aula_id == aula_id).first()
 
-def actualizar_aula(db: Session, aula_id: int, datos: AulaUpdate) -> Aula | None:
+async def actualizar_aula(db: AsyncSession, aula_id: int, datos: AulaUpdate) -> Aula | None:
     aula = obtener_aula(db, aula_id)
     if aula is None:
         return None
@@ -35,7 +33,7 @@ def actualizar_aula(db: Session, aula_id: int, datos: AulaUpdate) -> Aula | None
     db.refresh(aula)
     return aula
 
-def eliminar_aula(db: Session, aula_id: int) -> Aula | None:
+async def eliminar_aula(db: AsyncSession, aula_id: int) -> Aula | None:
     aula = obtener_aula(db, aula_id)
     if aula is None:
         return None
