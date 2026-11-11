@@ -1,14 +1,13 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.utils import confirmar
-from exceptions import Conflicto, NoEncontrado
-from models.alumno import Alumno
-from models.curso import Curso
-from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from models.inscripcion import Inscripcion
-from schemas.inscripcion import InscripcionCreate, InscripcionUpdate
+from backend.controllers.utils import confirmar
+from backend.exceptions import Conflicto, NoEncontrado
+from backend.models.alumno import Alumno
+from backend.models.curso import Curso
+from backend.models.inscripcion import Inscripcion
+from backend.models.materia import Materia
+from backend.schemas.inscripcion import InscripcionCreate, InscripcionUpdate
 
 async def _verificar_referencias(
     db: AsyncSession,
@@ -105,7 +104,7 @@ async def eliminar_inscripcion(db: AsyncSession, id_inscripcion: int) -> None:
     await db.delete(inscripcion)
     await confirmar(db, "No se pudo eliminar la inscripción")
 
-def registrar_inscripcion(db: Session, datos: InscripcionCreate) -> Inscripcion:
+def registrar_inscripcion(db: AsyncSession, datos: InscripcionCreate) -> Inscripcion:
     inscripcion = db.query(Inscripcion).filter(
         Inscripcion.alumno_id == datos.alumno_id,
         Inscripcion.materia_id == datos.materia_id
@@ -125,16 +124,16 @@ def registrar_inscripcion(db: Session, datos: InscripcionCreate) -> Inscripcion:
         return None
 
 
-def obtener_inscripcion(db: Session, inscripcion_id: int) -> Inscripcion | None:
+def obtener_inscripcion(db: AsyncSession, inscripcion_id: int) -> Inscripcion | None:
     return db.get(Inscripcion, inscripcion_id)
 
 
-def listar_inscripciones(db: Session) -> list[Inscripcion]:
+def listar_inscripciones(db: AsyncSession) -> list[Inscripcion]:
     return db.query(Inscripcion).all()
 
 
 def actualizar_inscripcion(
-    db: Session,
+    db: AsyncSession,
     inscripcion_id: int,
     datos: InscripcionUpdate,
 ) -> Inscripcion | None:
@@ -151,7 +150,7 @@ def actualizar_inscripcion(
     return inscripcion
 
 
-def eliminar_inscripcion(db: Session, inscripcion_id: int) -> Inscripcion | None:
+def eliminar_inscripcion(db: AsyncSession, inscripcion_id: int) -> Inscripcion | None:
     inscripcion = obtener_inscripcion(db, inscripcion_id)
     if inscripcion is None:
         return None

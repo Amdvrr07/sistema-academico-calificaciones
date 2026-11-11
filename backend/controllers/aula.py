@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.aula import Aula
-from schemas.aula import AulaCreate, AulaUpdate
+from backend.models.aula import Aula
+from backend.schemas.aula import AulaCreate, AulaUpdate
 
 async def crear_aula(db: AsyncSession, datos: AulaCreate) -> Aula | None:
     try:

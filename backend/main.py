@@ -1,9 +1,9 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from exceptions import Conflicto, NoEncontrado
-from database import Base, engine
-from routers import inscripcion, materias, notas, horarios, calificaciones, aulas, reportes_router
+from backend.exceptions import Conflicto, NoEncontrado
+from backend.database import Base, engine
+from backend.routers import inscripcion, materias, notas, horarios, calificaciones, aulas, reportes_router
 
 # Inicializar servidor fastAPI
 app = FastAPI()

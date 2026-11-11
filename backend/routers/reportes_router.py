@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Body
-from controllers import reportes_controller
+from backend.controllers import reportes_controller
 from typing import Optional
 from fastapi.responses import JSONResponse
-from schemas.reportes_schema import(
+from backend.schemas.reportes_schema import(
     DetallePerLapso,
     DetalleFinAnio,
     CobroDeudas,

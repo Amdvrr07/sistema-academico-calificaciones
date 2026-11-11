@@ -1,10 +1,10 @@
 from datetime import time
-from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select, and_
 from fastapi import HTTPException
-from models.bloque import Bloque
+from backend.models.bloque import Bloque
 async def hay_choque_horario( # Función asíncrona para validar choques de horarios
-    db: Session,
+    db: AsyncSession,
     dia: str,
     hora_inicio: time,
     hora_fin: time,
@@ -45,12 +45,18 @@ async def hay_choque_horario( # Función asíncrona para validar choques de hora
         ),
     }
     for recurso, (condicion_recurso, mensaje) in conflictos.items():
-        choque = (
-            db.query(Bloque)
-            .filter(solapamiento, condicion_recurso, filtro_exclusion)
-            .first()
+        # Construir consulta
+        stmt = (
+            select(Bloque).filter(solapamiento, condicion_recurso, filtro_exclusion)
         )
-        if choque: # Si hay choque
+
+        # Ejecución de consulta de forma asíncrona
+        resultado = await db.execute(stmt)
+
+        # Obtener primer registro de 'Bloque' mapeado bajo la condición de colisión
+        choque = resultado.scalars().first()
+
+        if choque: # Si hay colisión de bloques
             raise HTTPException(
                 status_code=409,
                 detail={

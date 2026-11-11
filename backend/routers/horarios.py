@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.horario import (
+from backend.controllers.horario import (
     crear_horario, obtener_horario, listar_horarios,
     actualizar_horario, eliminar_horario,
 )
-from database import get_db_session
-from schemas.horario import HorarioRespuesta
+from backend.database import get_db_session
+from backend.schemas.horario import HorarioRespuesta
 
 router = APIRouter(prefix="/horarios", tags=["Horarios"])
 

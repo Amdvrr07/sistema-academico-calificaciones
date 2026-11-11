@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, Header, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from controllers.notas import (
+from backend.controllers.notas import (
     actualizar_nota,
     eliminar_nota,
     listar_notas,
     obtener_nota,
     registrar_nota,
 )
-from controllers.reportes import calcular_promedio, generar_boletin
-from database import get_db_session
-from schemas.inscripcion import PATRON_PERIODO
-from schemas.notas import NotaCreate, NotaRead, NotaUpdate
+from backend.controllers.reportes import calcular_promedio, generar_boletin
+from backend.database import get_db_session
+from backend.schemas.inscripcion import PATRON_PERIODO
+from backend.schemas.notas import NotaCreate, NotaRead, NotaUpdate
 
 router = APIRouter(prefix="/notas", tags=["Notas"])
 
