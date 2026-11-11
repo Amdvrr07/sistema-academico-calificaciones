@@ -10,7 +10,7 @@ from sqlalchemy import select, or_
 
 
 from backend.database import get_db_session
-from backend.models.usuario import Usuario  # Asegúrate de que la ruta coincida
+from backend.models.usuario import Usuario  
 #from backend.models.rol import Rol
 
 # 1. LEER LA CLAVE SECRETA DE LAS VARIABLES DE ENTORNO (Solución A1)
